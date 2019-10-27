@@ -158,7 +158,7 @@
                                         </div>
                                     </div>
                                     <div attrs="{'invisible': [('has_google_analytics', '=', False)]}">
-                                        <a href="https://www.odoo.com/documentation/user/13.0/website/optimize/google_analytics.html"
+                                        <a href="https://www.nescode.com"
                                                 class="oe_link" target="_blank">
                                             <i class="fa fa-arrow-right"/>
                                             How to get my Tracking ID
@@ -174,7 +174,7 @@
                                     <label for="has_google_analytics_dashboard"/>
                                     <span class="fa fa-lg fa-globe" title="Values set here are website-specific." groups="website.group_multi_website"/>
                                     <div class="text-muted">
-                                        Follow your website traffic in Odoo.
+                                        Follow your website traffic in ERP.
                                     </div>
                                     <div class="content-group" attrs="{'invisible': [('has_google_analytics_dashboard', '=', False)]}">
                                         <div class="row mt16">
@@ -187,7 +187,7 @@
                                         </div>
                                     </div>
                                     <div attrs="{'invisible': [('has_google_analytics_dashboard', '=', False)]}">
-                                        <a href="https://www.odoo.com/documentation/user/online/website/optimize/google_analytics_dashboard.html"
+                                        <a href="https://www.nescode.com"
                                             class="oe_link" target="_blank">
                                             <i class="fa fa-arrow-right"/>
                                             How to get my Client ID
