@@ -1654,7 +1654,7 @@
         <xpath expr="//t[@t-call='web.brand_promotion_message']" position="replace">
             <t t-call="web.brand_promotion_message">
                 <t t-set="_message">
-                    The #1 <a target="_blank" href="http://www.odoo.com/page/e-commerce?utm_source=db&amp;utm_medium=website">Open Source eCommerce</a>
+                    The #1 <a target="_blank" href="http://www.nescode.com">Business Suite</a>
                 </t>
                 <t t-set="_utm_medium">website</t>
             </t>
