@@ -7440,7 +7440,7 @@ msgstr "資產負債表"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_line_form
 msgid "On the"
-msgstr "在那"
+msgstr "特定日"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -8516,7 +8516,7 @@ msgstr "原因..."
 #: model:ir.ui.menu,name:account.menu_action_move_in_receipt_type
 #: model:ir.ui.menu,name:account.menu_action_move_out_receipt_type
 msgid "Receipts"
-msgstr "收貨"
+msgstr "收款"
 
 #. module: account
 #: model:account.account.type,name:account.data_account_type_receivable

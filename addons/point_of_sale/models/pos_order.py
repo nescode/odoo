@@ -189,6 +189,7 @@ class PosOrder(models.Model):
             'price_unit': order_line.price_unit,
             'name': order_line.product_id.display_name,
             'tax_ids': [(6, 0, order_line.tax_ids.ids)],
+            'product_uom_id': order_line.product_uom_id.id,
         }
 
     def _get_pos_anglo_saxon_price_unit(self, product, partner_id, quantity):
@@ -373,7 +374,7 @@ class PosOrder(models.Model):
                 # considering partner's sale pricelist's currency
                 'currency_id': order.pricelist_id.currency_id.id,
                 'invoice_user_id': order.user_id.id,
-                'invoice_date': fields.Date.today(),
+                'invoice_date': order.date_order.date(),
                 'fiscal_position_id': order.fiscal_position_id.id,
                 'invoice_line_ids': [(0, None, order._prepare_invoice_line(line)) for line in order.lines],
             }
@@ -422,8 +423,9 @@ class PosOrder(models.Model):
         for order in orders:
             existing_order = False
             if 'server_id' in order['data']:
-                existing_order = self.env['pos.order'].search([('id', '=', order['data']['server_id'])], limit=1)
-            order_ids.append(self._process_order(order, draft, existing_order))
+                existing_order = self.env['pos.order'].search(['|', ('id', '=', order['data']['server_id']), ('pos_reference', '=', order['data']['name'])], limit=1)
+            if (existing_order and existing_order.state == 'draft') or not existing_order:
+                order_ids.append(self._process_order(order, draft, existing_order))
 
         return self.env['pos.order'].search_read(domain = [('id', 'in', order_ids)], fields = ['id', 'pos_reference'])
 

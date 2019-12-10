@@ -501,16 +501,23 @@ class AccountMove(models.Model):
         taxes_map = {}
 
         # ==== Add tax lines ====
+        to_remove = self.env['account.move.line']
         for line in self.line_ids.filtered('tax_repartition_line_id'):
             grouping_dict = self._get_tax_grouping_key_from_tax_line(line)
             grouping_key = _serialize_tax_grouping_key(grouping_dict)
-            taxes_map[grouping_key] = {
-                'tax_line': line,
-                'balance': 0.0,
-                'amount_currency': 0.0,
-                'tax_base_amount': 0.0,
-                'grouping_dict': False,
-            }
+            if grouping_key in taxes_map:
+                # A line with the same key does already exist, we only need one
+                # to modify it; we have to drop this one.
+                to_remove += line
+            else:
+                taxes_map[grouping_key] = {
+                    'tax_line': line,
+                    'balance': 0.0,
+                    'amount_currency': 0.0,
+                    'tax_base_amount': 0.0,
+                    'grouping_dict': False,
+                }
+        self.line_ids -= to_remove
 
         # ==== Mount base lines ====
         for line in self.line_ids.filtered(lambda line: not line.exclude_from_invoice_tab):
@@ -789,6 +796,9 @@ class AccountMove(models.Model):
             # Recompute amls: update existing line or create new one for each payment term.
             new_terms_lines = self.env['account.move.line']
             for date_maturity, balance, amount_currency in to_compute:
+                if self.journal_id.company_id.currency_id.is_zero(balance) and len(to_compute) > 1:
+                    continue
+
                 if existing_terms_lines_index < len(existing_terms_lines):
                     # Update existing line.
                     candidate = existing_terms_lines[existing_terms_lines_index]
@@ -1001,14 +1011,16 @@ class AccountMove(models.Model):
             move.amount_residual = -sign * (total_residual_currency if len(currencies) == 1 else total_residual)
             move.amount_untaxed_signed = -total_untaxed
             move.amount_tax_signed = -total_tax
-            move.amount_total_signed = -total
+            move.amount_total_signed = abs(total) if move.type == 'entry' else -total
             move.amount_residual_signed = total_residual
 
             currency = len(currencies) == 1 and currencies.pop() or move.company_id.currency_id
             is_paid = currency and currency.is_zero(move.amount_residual) or not move.amount_residual
 
             # Compute 'invoice_payment_state'.
-            if move.state == 'posted' and is_paid:
+            if move.type == 'entry':
+                move.invoice_payment_state = False
+            elif move.state == 'posted' and is_paid:
                 if move.id in in_payment_set:
                     move.invoice_payment_state = 'in_payment'
                 else:
@@ -1328,7 +1340,7 @@ class AccountMove(models.Model):
         if res:
             raise ValidationError(_('Posted journal entry must have an unique sequence number per company.'))
 
-    @api.constrains('ref')
+    @api.constrains('ref', 'type', 'partner_id', 'journal_id', 'invoice_date')
     def _check_duplicate_supplier_reference(self):
         moves = self.filtered(lambda move: move.is_purchase_document() and move.ref)
         if not moves:
@@ -1573,10 +1585,6 @@ class AccountMove(models.Model):
         # Ensure the move is still well balanced.
         if 'line_ids' in vals and self._context.get('check_move_validity', True):
             self._check_balanced()
-
-        # Check the lock date.
-        # /!\ The tax lock date is managed in the lines level, don't check it there.
-        self._check_fiscalyear_lock_date()
 
         # Trigger 'action_invoice_paid' when the invoice becomes paid after a write.
         not_paid_invoices.filtered(lambda move: move.invoice_payment_state in ('paid', 'in_payment')).action_invoice_paid()
@@ -2062,7 +2070,7 @@ class AccountMove(models.Model):
             # When the accounting date is prior to the tax lock date, move it automatically to the next available date.
             # /!\ 'check_move_validity' must be there since the dynamic lines will be recomputed outside the 'onchange'
             # environment.
-            if move.company_id.tax_lock_date and move.date <= move.company_id.tax_lock_date:
+            if (move.company_id.tax_lock_date and move.date <= move.company_id.tax_lock_date) and (move.line_ids.tax_ids or move.line_ids.tag_ids):
                 move.date = move.company_id.tax_lock_date + timedelta(days=1)
                 move.with_context(check_move_validity=False)._onchange_currency()
 
@@ -2877,6 +2885,7 @@ class AccountMoveLine(models.Model):
             if not line.currency_id:
                 continue
             if not line.move_id.is_invoice(include_receipts=True):
+                line._recompute_debit_credit_from_amount_currency()
                 continue
             line.update(line._get_fields_onchange_balance(
                 balance=line.amount_currency,
@@ -2897,7 +2906,19 @@ class AccountMoveLine(models.Model):
         for line in self:
             if line.move_id.is_invoice(include_receipts=True):
                 line._onchange_price_subtotal()
+            else:
+                line._recompute_debit_credit_from_amount_currency()
 
+    def _recompute_debit_credit_from_amount_currency(self):
+        for line in self:
+            # Recompute the debit/credit based on amount_currency/currency_id and date.
+
+            company_currency = line.account_id.company_id.currency_id
+            balance = line.amount_currency
+            if line.currency_id and company_currency and line.currency_id != company_currency:
+                balance = line.currency_id._convert(balance, company_currency, line.account_id.company_id, line.move_id.date or fields.Date.today())
+                line.debit = balance > 0 and balance or 0.0
+                line.credit = balance < 0 and -balance or 0.0
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
@@ -2976,7 +2997,7 @@ class AccountMoveLine(models.Model):
             # A constraint on account.tax.repartition.line ensures both those fields are mutually exclusive
             record.tax_line_id = rep_line.invoice_tax_id or rep_line.refund_tax_id
 
-    @api.depends('tag_ids', 'debit', 'credit', 'journal_id')
+    @api.depends('tag_ids', 'debit', 'credit')
     def _compute_tax_audit(self):
         separator = '        '
 

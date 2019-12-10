@@ -618,6 +618,7 @@ class HolidaysRequest(models.Model):
         return holiday
 
     def _read(self, fields):
+        fields = set(fields)
         if 'name' in fields and 'employee_id' not in fields:
             fields.add('employee_id')
         super(HolidaysRequest, self)._read(fields)
@@ -670,7 +671,7 @@ class HolidaysRequest(models.Model):
         error_message = _('You cannot delete a time off which is in %s state')
         state_description_values = {elem[0]: elem[1] for elem in self._fields['state']._description_selection(self.env)}
 
-        if not self.user_has_groups('hr_holidays.groups_hr_user'):
+        if not self.user_has_groups('hr_holidays.group_hr_holidays_user'):
             if any(hol.state != 'draft' for hol in self):
                 raise UserError(error_message % state_description_values.get(self[:1].state))
         else:

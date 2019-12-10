@@ -720,7 +720,7 @@ class Meeting(models.Model):
         if zallday:
             display_time = _("AllDay , %s") % (date_str)
         elif zduration < 24:
-            duration = date + timedelta(hours=zduration)
+            duration = date + timedelta(minutes=round(zduration*60))
             duration_time = to_text(duration.strftime(format_time))
             display_time = _(u"%s at (%s To %s) (%s)") % (
                 date_str,
@@ -757,6 +757,9 @@ class Meeting(models.Model):
                     event.is_highlighted = True
                 else:
                     event.is_highlighted = False
+        else:
+            for event in self:
+                event.is_highlighted = False
 
     name = fields.Char('Meeting Subject', required=True, states={'done': [('readonly', True)]})
     state = fields.Selection([('draft', 'Unconfirmed'), ('open', 'Confirmed')], string='Status', readonly=True, tracking=True, default='draft')
@@ -946,7 +949,11 @@ class Meeting(models.Model):
         if self.start_datetime:
             start = self.start_datetime
             self.start = self.start_datetime
-            self.stop = start + timedelta(hours=self.duration) - timedelta(seconds=1)
+            # Round the duration (in hours) to the minute to avoid weird situations where the event
+            # stops at 4:19:59, later displayed as 4:19.
+            self.stop = start + timedelta(minutes=round(self.duration * 60))
+            if self.allday:
+                self.stop -= timedelta(seconds=1)
 
     @api.onchange('start_date')
     def _onchange_start_date(self):
@@ -1683,13 +1690,13 @@ class Meeting(models.Model):
             if r['privacy'] == 'private':
                 for f in r:
                     recurrent_fields = self._get_recurrent_fields()
-                    public_fields = list(set(recurrent_fields + ['id', 'allday', 'start', 'stop', 'display_start', 'display_stop', 'duration', 'user_id', 'state', 'interval', 'count', 'recurrent_id_date', 'rrule']))
+                    public_fields = list(set(recurrent_fields + ['id', 'active', 'allday', 'start', 'stop', 'display_start', 'display_stop', 'duration', 'user_id', 'state', 'interval', 'count', 'recurrent_id_date', 'rrule']))
                     if f not in public_fields:
                         if isinstance(r[f], list):
                             r[f] = []
                         else:
                             r[f] = False
-                    if f == 'name':
+                    if f in ['name', 'display_name']:
                         r[f] = _('Busy')
 
         for r in result:

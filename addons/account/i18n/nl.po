@@ -12915,7 +12915,7 @@ msgid ""
 "create a credit note instead. Use the action menu to transform it into a "
 "credit note or refund."
 msgstr ""
-"U kunt gen factuur bevestigen met een negatief totaalbedrag. U dient "
+"U kunt geen factuur bevestigen met een negatief totaalbedrag. U dient "
 "hiervoor een credit factuur aan te maken. Gebruik het actiemenu om het om te"
 " zetten in een creditfactuur."
 
@@ -13087,7 +13087,7 @@ msgstr "voor de leverancier. U kan deze toewijzen om te markeren als betaald."
 #: code:addons/account/static/src/xml/account_reconciliation.xml:0
 #, python-format
 msgid "have been reconciled automatically."
-msgstr "Werden automatisch gereconsilleerd."
+msgstr "Werden automatisch afgeletterd."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_invoice_send__invoice_without_email

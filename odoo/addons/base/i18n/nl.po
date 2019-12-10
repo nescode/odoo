@@ -828,7 +828,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Deze koppel module laat toe om onderaannemingen te beheren met de dropshipping-module."
+"Deze koppel module laat toe om uitbesteding te beheren met de dropshipping-module."
 
 #. module: base
 #: model:ir.module.module,description:base.module_mrp_subcontracting_account
@@ -838,7 +838,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Deze koppel module laat toe om onderaannemingen te beheren met waardering."
+"Deze koppel module laat toe om unitbestedingen te beheren met waardering."
 
 #. module: base
 #: model:ir.module.module,description:base.module_stock_barcode_quality_control
@@ -9811,6 +9811,8 @@ msgstr ""
 msgid ""
 "Allows to send sms to website visitor if the visitor is linked to a partner."
 msgstr ""
+"Staat het versturen van SMS naar website bezoeker toe indien de bezoeker "
+"gekoppeld is aan een relatie."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_crm_sms
@@ -13444,7 +13446,7 @@ msgstr "Dropdown menu"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_subcontracting_dropshipping
 msgid "Dropship and Subcontracting Management"
-msgstr "Dropship en Onderaannemingsbeheer"
+msgstr "Dropship en uitbestedingenbeheer"
 
 #. module: base
 #: code:addons/base/models/res_company.py:0
@@ -25070,12 +25072,12 @@ msgstr "Studio"
 #. module: base
 #: model:ir.module.module,summary:base.module_mrp_subcontracting
 msgid "Subcontract Productions"
-msgstr "Onderaannemerslocatie"
+msgstr "Uitbestedingslocatie"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_subcontracting_account
 msgid "Subcontracting Management with Stock Valuation"
-msgstr "Beheer van onderaannemers met voorraadwaardering"
+msgstr "Beheer van uitbesteden met voorraadwaardering"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.edit_menu_access
