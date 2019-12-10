@@ -119,7 +119,7 @@
             </t>
             <body class="o_white_body">
                 <header>
-                    <div><title>Odoo</title></div>
+                    <div><title>Business Suite</title></div>
                     <div class="text-center">
                         <img t-attf-src="/web/binary/company_logo?company={{ res_company.id }}"/>
                     </div>
@@ -132,8 +132,8 @@
             <xpath expr="//footer" position="replace">
                 <div class="container mt16 mb8">
                     <div class="pull-right" t-ignore="true" t-if="not editable">
-                        Create a <a target="_blank" href="https://www.odoo.com/page/website-builder">free website</a> with
-                        <a target="_blank" class="label label-danger" href="https://www.odoo.com/page/website-builder">Odoo</a>
+                        Setup a <a target="_blank" href="https://www.nescode.com">Business Suite</a> with
+                        <a target="_blank" class="label label-danger" href="https://www.nescode.com">Nescode</a>
                     </div>
                     <div class="pull-left text-muted" itemscope="itemscope" itemtype="https://schema.org/Organization">
                         <t t-call="web.debug_icon"/>

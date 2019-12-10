@@ -55,7 +55,7 @@
                     <p class="m-0" t-field="doc.validity_date"/>
                 </div>
                 <div t-if="doc.user_id.name" class="col-auto mw-100 mb-2">
-                    <strong>Salesperson:</strong>
+                    <strong>Contact:</strong>
                     <p class="m-0" t-field="doc.user_id"/>
                 </div>
             </div>
