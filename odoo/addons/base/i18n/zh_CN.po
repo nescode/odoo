@@ -31,8 +31,6 @@
 # zpq001 <zpq001@live.com>, 2019
 # diaojiaolou <124412206@qq.com>, 2019
 # 张宏奎 <zhanghongkui@inspur.com>, 2019
-# niulin lnc. <admin@niulin.net>, 2019
-# liulixia <liu.lixia@elico-corp.com>, 2019
 # 朱仁杰 <johnson19960308@gmail.com>, 2019
 # 湘子 南 <1360857908@qq.com>, 2019
 # Shane Tsoi <sso@odoo.com>, 2019
@@ -63,13 +61,15 @@
 # Felix Yuen <fyu@odoo.com>, 2019
 # Manga Tsang <mts@odoo.com>, 2019
 # Emily Jia <eji@odoo.com>, 2019
-# guohuadeng <guohuadeng@hotmail.com>, 2019
 # 山西清水欧度(QQ:54773801) <54773801@qq.com>, 2019
 # liAnGjiA <liangjia@qq.com>, 2019
-# Jeffery CHEN Fan <jeffery9@gmail.com>, 2019
 # Martin Trigaux, 2019
 # Shiping Lv <lvshiping@sina.com>, 2019
 # 阳 杨 <1203461059@qq.com>, 2019
+# niulin lnc. <admin@niulin.net>, 2019
+# 佳 胡 <hujia@tang96.com>, 2019
+# Jeffery CHEN Fan <jeffery9@gmail.com>, 2020
+# guohuadeng <guohuadeng@hotmail.com>, 2020
 # 
 msgid ""
 msgstr ""
@@ -77,7 +77,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-01 12:22+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: 阳 杨 <1203461059@qq.com>, 2019\n"
+"Last-Translator: guohuadeng <guohuadeng@hotmail.com>, 2020\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -886,7 +886,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"       这个桥模块会自动安装，当库存、条形码、和质量控制模块被安装.\n"
+"       这个关联模块会自动安装，当库存、条形码、和质量控制模块被安装.\n"
 "    "
 
 #. module: base
@@ -8102,6 +8102,14 @@ msgid ""
 "                                <b attrs=\"{'invisible': [('type', '!=', 'private')]}\">Private Address</b>\n"
 "                                <b attrs=\"{'invisible': [('type', '!=', False)]}\">Address</b>"
 msgstr ""
+"<span class=\"o_form_label\" name=\"address_name\">\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'contact')]}\">公司地址</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'invoice')]}\">发票地址</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'delivery')]}\">邮寄地址</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'other')]}\">其他地址</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'private')]}\">私人地址</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', False)]}\">地址</b>\n"
+"                            </span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_short_form
@@ -8124,7 +8132,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid "<code>Warning</code>: Warning Exception to use with <code>raise</code>"
-msgstr "<code>警告</code>：使用<code>提高</code>时出现警告异常"
+msgstr "<code>Warning</code>：使用<code>raise</code>时出现警告异常"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_model_fields_form
@@ -8149,33 +8157,33 @@ msgid ""
 "<code>log(message, level='info')</code>:logging function to record debug "
 "information in <code>ir.logging</code> table"
 msgstr ""
-"<code>日志 (message, level='info')：在 <code>ir.logging</code> 表中记录调试信息的日志记录功能"
+"<code>log (message, level='info')：在 <code>ir.logging</code> 表中记录调试信息的日志记录功能"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid ""
 "<code>model</code>: Odoo Model of the record on which the action is "
 "triggered; is a void recordset"
-msgstr "<code>模型</code>：触发操作的 Odoo 模型记录；是一个无效的记录集"
+msgstr "<code>model</code>：触发操作的 Odoo 模型记录；是一个无效的记录集"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid ""
 "<code>record</code>: record on which the action is triggered; may be be void"
-msgstr "<code>记录</code>：触发操作的记录；可能无效"
+msgstr "<code>record</code>：触发操作的记录；可能无效"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid ""
 "<code>records</code>: recordset of all records on which the action is "
 "triggered in multi mode; may be void"
-msgstr "<code>记录</code>：在多个模式下触发操作的所有记录的记录集；可能无效"
+msgstr "<code>records</code>：在多个模式下触发操作的所有记录的记录集；可能无效"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_model_fields_form
 #: model_terms:ir.ui.view,arch_db:base.view_model_form
 msgid "<code>self</code> (the set of records to compute)"
-msgstr "<code>自己</code> (要计算的记录集)"
+msgstr "<code>self</code> (要计算的记录集)"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_model_fields_form
@@ -8189,8 +8197,8 @@ msgid ""
 "<code>time</code>, <code>datetime</code>, <code>dateutil</code>, "
 "<code>timezone</code>: useful Python libraries"
 msgstr ""
-"<code>时间、</code><code>日期时间</code>、<code>dateutil</code>、<code>时区</code>：有用的 "
-"Python 库"
+"<code>time</code>、<code>datetime</code>、<code>dateutil</code>、<code>timezone</code>：有用的Python"
+" 库"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_res_company_kanban
@@ -11793,7 +11801,7 @@ msgstr "联系人称谓"
 #: model:ir.module.module,shortdesc:base.module_contacts
 #: model_terms:ir.ui.view,arch_db:base.view_partner_tree
 msgid "Contacts"
-msgstr "更多联系人"
+msgstr "联系人"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
@@ -17646,18 +17654,18 @@ msgstr "当前窗口的主要动作"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module__maintainer
 msgid "Maintainer"
-msgstr "维护者"
+msgstr "保养人"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_operations_maintenance
 #: model:ir.module.module,shortdesc:base.module_maintenance
 msgid "Maintenance"
-msgstr "维护"
+msgstr "保养"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_maintenance
 msgid "Maintenance - HR"
-msgstr "维修 - HR"
+msgstr "保养 - HR"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_maintenance
@@ -18105,7 +18113,7 @@ msgstr "自动合并所有处理"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.base_partner_merge_automatic_wizard_form
 msgid "Merge Contacts"
-msgstr "合并合同"
+msgstr "合并联系人"
 
 #. module: base
 #: model:ir.model,name:base.model_base_partner_merge_line
@@ -26086,7 +26094,7 @@ msgstr "跟踪员工执行任务花费时间"
 #. module: base
 #: model:ir.module.module,summary:base.module_maintenance
 msgid "Track equipment and manage maintenance requests"
-msgstr "跟踪设备并管理维修需求"
+msgstr "跟踪设备并管理保养需求"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk
