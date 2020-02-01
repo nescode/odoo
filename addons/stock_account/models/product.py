@@ -317,7 +317,7 @@ class ProductProduct(models.Model):
             ('remaining_qty', '<', 0),
             ('stock_move_id', '!=', False),
             ('company_id', '=', company.id),
-        ])
+        ], order='create_date, id')
         for svl_to_vacuum in svls_to_vacuum:
             domain = [
                 ('company_id', '=', svl_to_vacuum.company_id.id),
@@ -331,7 +331,7 @@ class ProductProduct(models.Model):
             ]
             candidates = self.env['stock.valuation.layer'].sudo().search(domain)
             if not candidates:
-                continue
+                break
             qty_to_take_on_candidates = abs(svl_to_vacuum.remaining_qty)
             qty_taken_on_candidates = 0
             tmp_value = 0
@@ -704,10 +704,10 @@ class ProductCategory(models.Model):
                 # Empty out the stock with the current cost method.
                 if new_cost_method:
                     description = _("Costing method change for product category %s: from %s to %s.") \
-                        % (self.display_name, self.property_cost_method, new_cost_method)
+                        % (product_category.display_name, product_category.property_cost_method, new_cost_method)
                 else:
                     description = _("Valuation method change for product category %s: from %s to %s.") \
-                        % (self.display_name, self.property_valuation, new_valuation)
+                        % (product_category.display_name, product_category.property_valuation, new_valuation)
                 out_svl_vals_list, products_orig_quantity_svl, products = Product\
                     ._svl_empty_stock(description, product_category=product_category)
                 out_stock_valuation_layers = SVL.sudo().create(out_svl_vals_list)
