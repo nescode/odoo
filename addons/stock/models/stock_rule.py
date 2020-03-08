@@ -187,6 +187,8 @@ class StockRule(models.Model):
             'picking_id': False,
             'picking_type_id': self.picking_type_id.id,
             'propagate_cancel': self.propagate_cancel,
+            'propagate_date': self.propagate_date,
+            'propagate_date_minimum_delta': self.propagate_date_minimum_delta,
             'warehouse_id': self.warehouse_id.id,
             'delay_alert': self.delay_alert
         }
@@ -364,7 +366,10 @@ class ProcurementGroup(models.Model):
             procurement.values.setdefault('company_id', self.env.company)
             procurement.values.setdefault('priority', '1')
             procurement.values.setdefault('date_planned', fields.Datetime.now())
-            if float_is_zero(procurement.product_qty, precision_rounding=procurement.product_uom.rounding):
+            if (
+                procurement.product_id.type not in ('consu', 'product') or
+                float_is_zero(procurement.product_qty, precision_rounding=procurement.product_uom.rounding)
+            ):
                 continue
             rule = self._get_rule(procurement.product_id, procurement.location_id, procurement.values)
             if not rule:

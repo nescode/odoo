@@ -1673,6 +1673,22 @@ class TestFields(common.TransactionCase):
         self.assertEqual(record_no_bin_size.binary_computed, expected_value)
         self.assertEqual(record_bin_size.binary_computed, expected_value)
 
+    def test_96_order_m2o(self):
+        belgium, congo = self.env['test_new_api.country'].create([
+            {'name': "Duchy of Brabant"},
+            {'name': "Congo"},
+        ])
+        cities = self.env['test_new_api.city'].create([
+            {'name': "Brussels", 'country_id': belgium.id},
+            {'name': "Kinshasa", 'country_id': congo.id},
+        ])
+        # cities are sorted by country_id, name
+        self.assertEqual(cities.sorted().mapped('name'), ["Kinshasa", "Brussels"])
+
+        # change order of countries, and check sorted()
+        belgium.name = "Belgium"
+        self.assertEqual(cities.sorted().mapped('name'), ["Brussels", "Kinshasa"])
+
 
 class TestX2many(common.TransactionCase):
     def test_definition_many2many(self):
@@ -1916,6 +1932,18 @@ class TestX2many(common.TransactionCase):
         self.assertEqual(len(lines), 3)
         for line in lines:
             self.assertEqual(len(line.tags), 3)
+
+    def test_custom_m2m(self):
+        model_id = self.env['ir.model']._get_id('res.partner')
+        field = self.env['ir.model.fields'].create({
+            'name': 'x_foo',
+            'field_description': 'Foo',
+            'model_id': model_id,
+            'ttype': 'many2many',
+            'relation': 'res.country',
+            'store': False,
+        })
+        self.assertTrue(field.unlink())
 
 
 class TestHtmlField(common.TransactionCase):

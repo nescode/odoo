@@ -493,6 +493,7 @@ class AccountBankStatementLine(models.Model):
             'journal_id': self.statement_id.journal_id.id,
             'currency_id': self.statement_id.currency_id.id,
             'date': self.statement_id.accounting_date or self.date,
+            'partner_id': self.partner_id.id,
             'ref': ref,
         }
         if self.move_name:
@@ -847,7 +848,8 @@ class AccountBankStatementLine(models.Model):
             aml_dict['currency_id'] = statement_currency.id
 
     def _check_invoice_state(self, invoice):
-        invoice._compute_amount()
+        if invoice.is_invoice(include_receipts=True):
+            invoice._compute_amount()
 
     def button_confirm_bank(self):
         self.statement_id.button_confirm_bank()
