@@ -1173,7 +1173,7 @@ msgstr "선택을 하지 않으면, 판매원에게 중복된 영업 기회를 �
 #. module: crm
 #: model:ir.ui.menu,name:crm.menu_import_crm
 msgid "Import & Synchronize"
-msgstr "가져 오기 및 동기화"
+msgstr "가져오기 및 동기화"
 
 #. module: crm
 #: code:addons/crm/models/crm_lead.py:0
@@ -2706,7 +2706,7 @@ msgstr "전문인력/기술 없음"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__website
 msgid "Website"
-msgstr "웹사이트 관리"
+msgstr "웹사이트"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__website_message_ids
@@ -2781,8 +2781,8 @@ msgid ""
 "                documents, track all discussions, and much more."
 msgstr ""
 "회의에서 계획하고 영업 기회에서 활동을 기록하고,\n"
-"                견적으로 변환하고, 관련 문서를 첨부하고, 모든 토론을 추적하는 등의\n"
-"                작업을 수행 할 수 있습니다."
+"                견적으로 변환하고, 관련 문서를 첨부하고, 모든 업무 협의를 추적하는 등의\n"
+"                작업을 수행할 수 있습니다."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_case_form_view_salesteams_opportunity
@@ -2792,8 +2792,8 @@ msgid ""
 "                    documents, track all discussions, and much more."
 msgstr ""
 "영업 기회를 통해 회의 및 전화 통화를 계획하고, 견적으로 변환하고,\n"
-"                    관련 문서를 첨부하고, 모든 토론을 추적하는 등의\n"
-"                    작업을 수행 할 수 있습니다."
+"                    관련 문서를 첨부하고, 모든 업무 협의를 추적하는 등의\n"
+"                    작업을 수행할 수 있습니다."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form

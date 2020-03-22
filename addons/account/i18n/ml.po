@@ -7414,6 +7414,12 @@ msgid "Next Number Prefix"
 msgstr "അടുത്ത നമ്പർ പ്രിഫിക്‌സ്"
 
 #. module: account
+#: code:addons/account/models/account_bank_statement.py:545
+#, python-format
+msgid "No default debit and credit account defined on journal %s (ids: %s)"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__blocked
 msgid "No Follow-up"
 msgstr "ഫോളോ-അപ്പ് ഇല്ല"
@@ -13422,11 +13428,9 @@ msgstr ""
 "നിങ്ങളുടെ അനലിറ്റിക് അക്കൗണ്ടിൽ സജ്ജമാക്കാൻ കഴിയില്ല."
 
 #. module: account
+#. module: account
 #: code:addons/account/models/account_analytic_line.py:0
-#, python-format
-msgid ""
-"You can't set a different company on your analytic tags since there are some"
-" journal items linked to it."
+#: code:addons/account/models/account.py:56
+#, python-format, python-format
+msgid "A tag defined to be used on taxes must always have a country set."
 msgstr ""
-"നിങ്ങളുടെ ജേണൽ‌ ഇനങ്ങളുമായി ലിങ്കുചെയ്‌തിരിക്കുന്നതിനാൽ‌ നിങ്ങളുടെ വിശകലന "
-"ടാഗുകളിൽ‌ മറ്റൊരു കമ്പനി സജ്ജമാക്കാൻ‌ കഴിയില്ല."
