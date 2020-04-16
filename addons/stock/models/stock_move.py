@@ -306,11 +306,13 @@ class StockMove(models.Model):
         for d in data:
             rec[d['move_id'][0]] += [(d['product_uom_id'][0], d['qty_done'])]
 
+        # In case we are in an onchange, move.id is a NewId, not an integer. Therefore, there is no
+        # match in the rec dictionary. By using move.ids[0] we get the correct integer value.
         for move in self:
             uom = move.product_uom
             move.quantity_done = sum(
                 self.env['uom.uom'].browse(line_uom_id)._compute_quantity(qty, uom, round=False)
-                for line_uom_id, qty in rec.get(move.id, [])
+                for line_uom_id, qty in rec.get(move.ids[0] if move.ids else move.id, [])
             )
 
     def _quantity_done_set(self):
@@ -635,8 +637,9 @@ class StockMove(models.Model):
         padding = len(initial_number)
         # We split the serial number to get the prefix and suffix.
         splitted = regex_split(initial_number, self.next_serial)
-        prefix = splitted[0]
-        suffix = splitted[1]
+        # initial_number could appear several times in the SN, e.g. BAV023B00001S00001
+        prefix = initial_number.join(splitted[:-1])
+        suffix = splitted[-1]
         initial_number = int(initial_number)
 
         lot_names = []
@@ -769,22 +772,22 @@ class StockMove(models.Model):
             .filtered(lambda move: move.state not in ['cancel', 'done'])\
             .sorted(key=lambda move: (sort_map.get(move.state, 0), move.product_uom_qty))
         # The picking should be the same for all moves.
-        if moves_todo[0].picking_id and moves_todo[0].picking_id.move_type == 'one':
+        if moves_todo[:1].picking_id and moves_todo[:1].picking_id.move_type == 'one':
             most_important_move = moves_todo[0]
             if most_important_move.state == 'confirmed':
                 return 'confirmed' if most_important_move.product_uom_qty else 'assigned'
             elif most_important_move.state == 'partially_available':
                 return 'confirmed'
             else:
-                return moves_todo[0].state or 'draft'
-        elif moves_todo[0].state != 'assigned' and any(move.state in ['assigned', 'partially_available'] for move in moves_todo):
+                return moves_todo[:1].state or 'draft'
+        elif moves_todo[:1].state != 'assigned' and any(move.state in ['assigned', 'partially_available'] for move in moves_todo):
             return 'partially_available'
         else:
-            least_important_move = moves_todo[-1]
+            least_important_move = moves_todo[-1:]
             if least_important_move.state == 'confirmed' and least_important_move.product_uom_qty == 0:
                 return 'assigned'
             else:
-                return moves_todo[-1].state or 'draft'
+                return moves_todo[-1:].state or 'draft'
 
     @api.onchange('product_id', 'product_qty')
     def onchange_quantity(self):
@@ -929,6 +932,7 @@ class StockMove(models.Model):
         else:
             location_dest = self.location_dest_id._get_putaway_strategy(self.product_id)
         move_line_vals = {
+            'picking_id': self.picking_id.id,
             'location_dest_id': location_dest.id or self.location_dest_id.id,
             'location_id': self.location_id.id,
             'product_id': self.product_id.id,

@@ -266,6 +266,35 @@ class AccountMove(models.Model):
     inalterable_hash = fields.Char(string="Inalterability Hash", readonly=True, copy=False)
     string_to_hash = fields.Char(compute='_compute_string_to_hash', readonly=True)
 
+    @api.model
+    def _field_will_change(self, record, vals, field_name):
+        if field_name not in vals:
+            return False
+        field = record._fields[field_name]
+        if field.type == 'many2one':
+            return record[field_name].id != vals[field_name]
+        if field.type == 'many2many':
+            current_ids = set(record[field_name].ids)
+            after_write_ids = set(record.new({field_name: vals[field_name]})[field_name].ids)
+            return current_ids != after_write_ids
+        if field.type == 'one2many':
+            return True
+        if field.type == 'monetary' and record[field.currency_field]:
+            return not record[field.currency_field].is_zero(record[field_name] - vals[field_name])
+        if field.type == 'float':
+            record_value = field.convert_to_cache(record[field_name], record)
+            to_write_value = field.convert_to_cache(vals[field_name], record)
+            return record_value != to_write_value
+        return record[field_name] != vals[field_name]
+
+    @api.model
+    def _cleanup_write_orm_values(self, record, vals):
+        cleaned_vals = dict(vals)
+        for field_name, value in vals.items():
+            if not self._field_will_change(record, vals, field_name):
+                del cleaned_vals[field_name]
+        return cleaned_vals
+
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
     # -------------------------------------------------------------------------
@@ -310,12 +339,21 @@ class AccountMove(models.Model):
                 if p.invoice_warn == 'block':
                     self.partner_id = False
                     return {'warning': warning}
-        for line in self.line_ids:
-            line.partner_id = self.partner_id.commercial_partner_id
+
         if self.is_sale_document(include_receipts=True) and self.partner_id.property_payment_term_id:
             self.invoice_payment_term_id = self.partner_id.property_payment_term_id
+            new_term_account = self.partner_id.commercial_partner_id.property_account_receivable_id
         elif self.is_purchase_document(include_receipts=True) and self.partner_id.property_supplier_payment_term_id:
             self.invoice_payment_term_id = self.partner_id.property_supplier_payment_term_id
+            new_term_account = self.partner_id.commercial_partner_id.property_account_payable_id
+        else:
+            new_term_account = None
+
+        for line in self.line_ids:
+            line.partner_id = self.partner_id.commercial_partner_id
+
+            if new_term_account and line.account_id.user_type_id.type in ('receivable', 'payable'):
+                line.account_id = new_term_account
 
         self._compute_bank_partner_id()
         self.invoice_partner_bank_id = self.bank_partner_id.bank_ids and self.bank_partner_id.bank_ids[0]
@@ -1418,7 +1456,7 @@ class AccountMove(models.Model):
         self.env['account.move.line'].flush(['debit', 'credit', 'move_id'])
         self.env['account.move'].flush(['journal_id'])
         self._cr.execute('''
-            SELECT line.move_id, ROUND(SUM(debit - credit), currency.decimal_places)
+            SELECT line.move_id, ROUND(SUM(line.debit - line.credit), currency.decimal_places)
             FROM account_move_line line
             JOIN account_move move ON move.id = line.move_id
             JOIN account_journal journal ON journal.id = move.journal_id
@@ -1426,7 +1464,7 @@ class AccountMove(models.Model):
             JOIN res_currency currency ON currency.id = company.currency_id
             WHERE line.move_id IN %s
             GROUP BY line.move_id, currency.decimal_places
-            HAVING ROUND(SUM(debit - credit), currency.decimal_places) != 0.0;
+            HAVING ROUND(SUM(line.debit - line.credit), currency.decimal_places) != 0.0;
         ''', [tuple(self.ids)])
 
         query_res = self._cr.fetchall()
@@ -1467,7 +1505,7 @@ class AccountMove(models.Model):
             # Shortcut to load the demo data.
             # Doing line.account_id triggers a default_get(['account_id']) that could returns a result.
             # A section / note must not have an account_id set.
-            if not line._cache.get('account_id') and not line.display_type:
+            if not line._cache.get('account_id') and not line.display_type and not line._origin:
                 line.account_id = line._get_computed_account()
                 if not line.account_id:
                     if self.is_sale_document(include_receipts=True):
@@ -2162,6 +2200,10 @@ class AccountMove(models.Model):
         self.filtered(
             lambda m: m.is_invoice(include_receipts=True) and m.currency_id.is_zero(m.amount_total)
         ).action_invoice_paid()
+
+        # Force balance check since nothing prevents another module to create an incorrect entry.
+        # This is performed at the very end to avoid flushing fields before the whole processing.
+        self._check_balanced()
 
     def action_reverse(self):
         action = self.env.ref('account.action_view_account_move_reversal').read()[0]
@@ -3312,15 +3354,15 @@ class AccountMoveLine(models.Model):
                     line.payment_id.state = 'reconciled'
 
             # Check the lock date.
-            if any(field_will_change(line, field_name) for field_name in PROTECTED_FIELDS_LOCK_DATE):
+            if any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in PROTECTED_FIELDS_LOCK_DATE):
                 line.move_id._check_fiscalyear_lock_date()
 
             # Check the tax lock date.
-            if any(field_will_change(line, field_name) for field_name in PROTECTED_FIELDS_TAX_LOCK_DATE):
+            if any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in PROTECTED_FIELDS_TAX_LOCK_DATE):
                 line._check_tax_lock_date()
 
             # Check the reconciliation.
-            if any(field_will_change(line, field_name) for field_name in PROTECTED_FIELDS_RECONCILIATION):
+            if any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in PROTECTED_FIELDS_RECONCILIATION):
                 line._check_reconciliation()
 
             # Check switching receivable / payable accounts.
@@ -3335,9 +3377,14 @@ class AccountMoveLine(models.Model):
                             or (account_type != 'payable' and account_to_write.user_type_id.type == 'payable'):
                         raise UserError(_("You can only set an account having the payable type on payment terms lines for vendor bill."))
 
-        result = super(AccountMoveLine, self).write(vals)
-
+        result = True
         for line in self:
+            cleaned_vals = line.move_id._cleanup_write_orm_values(line, vals)
+            if not cleaned_vals:
+                continue
+
+            result |= super(AccountMoveLine, line).write(cleaned_vals)
+
             if not line.move_id.is_invoice(include_receipts=True):
                 continue
 
@@ -3345,7 +3392,7 @@ class AccountMoveLine(models.Model):
             # As we can't express such synchronization as computed fields without cycling, we need to do it both
             # in onchange and in create/write. So, if something changed in accounting [resp. business] fields,
             # business [resp. accounting] fields are recomputed.
-            if any(field in vals for field in ACCOUNTING_FIELDS):
+            if any(field in cleaned_vals for field in ACCOUNTING_FIELDS):
                 balance = line.currency_id and line.amount_currency or line.debit - line.credit
                 price_subtotal = line._get_price_total_and_subtotal().get('price_subtotal', 0.0)
                 to_write = line._get_fields_onchange_balance(
@@ -3357,13 +3404,13 @@ class AccountMoveLine(models.Model):
                     quantity=to_write.get('quantity', line.quantity),
                     discount=to_write.get('discount', line.discount),
                 ))
-                super(AccountMoveLine, line).write(to_write)
-            elif any(field in vals for field in BUSINESS_FIELDS):
+                result |= super(AccountMoveLine, line).write(to_write)
+            elif any(field in cleaned_vals for field in BUSINESS_FIELDS):
                 to_write = line._get_price_total_and_subtotal()
                 to_write.update(line._get_fields_onchange_subtotal(
                     price_subtotal=to_write['price_subtotal'],
                 ))
-                super(AccountMoveLine, line).write(to_write)
+                result |= super(AccountMoveLine, line).write(to_write)
 
         # Check total_debit == total_credit in the related moves.
         if self._context.get('check_move_validity', True):
@@ -4219,6 +4266,7 @@ class AccountPartialReconcile(models.Model):
                             'currency_id': line.currency_id.id,
                             'move_id': newly_created_move.id,
                             'partner_id': line.partner_id.id,
+                            'journal_id': newly_created_move.journal_id.id,
                         })
                         # Group by cash basis account and tax
                         self.env['account.move.line'].with_context(check_move_validity=False).create({
@@ -4233,6 +4281,7 @@ class AccountPartialReconcile(models.Model):
                             'currency_id': line.currency_id.id,
                             'move_id': newly_created_move.id,
                             'partner_id': line.partner_id.id,
+                            'journal_id': newly_created_move.journal_id.id,
                             'tax_repartition_line_id': line.tax_repartition_line_id.id,
                             'tax_base_amount': line.tax_base_amount,
                             'tag_ids': [(6, 0, line.tag_ids.ids)],
@@ -4260,6 +4309,7 @@ class AccountPartialReconcile(models.Model):
                                 'currency_id': line.currency_id.id,
                                 'amount_currency': self.amount_currency and line.currency_id.round(line.amount_currency * amount / line.balance) or 0.0,
                                 'partner_id': line.partner_id.id,
+                                'journal_id': newly_created_move.journal_id.id,
                                 'tax_repartition_line_id': line.tax_repartition_line_id.id,
                                 'tax_base_amount': line.tax_base_amount,
                                 'tag_ids': [(6, 0, line.tag_ids.ids)],
@@ -4274,6 +4324,7 @@ class AccountPartialReconcile(models.Model):
                                 'currency_id': line.currency_id.id,
                                 'amount_currency': self.amount_currency and line.currency_id.round(-line.amount_currency * amount / line.balance) or 0.0,
                                 'partner_id': line.partner_id.id,
+                                'journal_id': newly_created_move.journal_id.id,
                             })
         if newly_created_move:
             self._set_tax_cash_basis_entry_date(move_date, newly_created_move)
