@@ -25,16 +25,16 @@
 # Mikko Närjänen <mikko.narjanen@web-veistamo.fi>, 2019
 # Tuomas Lyyra <tuomas.lyyra@legenda.fi>, 2019
 # Sari Mäyrä <sari.mayra@sv-oy.fi>, 2019
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2020
 # Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2020
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 12:32+0000\n"
+"POT-Creation-Date: 2020-04-27 09:21+0000\n"
 "PO-Revision-Date: 2019-08-26 09:14+0000\n"
-"Last-Translator: Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2020\n"
+"Last-Translator: Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2020\n"
 "Language-Team: Finnish (https://www.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -576,7 +576,7 @@ msgstr "Toimenpiteet"
 #: model:ir.model.fields,field_description:stock.field_stock_picking__activity_exception_decoration
 #: model:ir.model.fields,field_description:stock.field_stock_production_lot__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr ""
+msgstr "Aktiviteettipoikkeuksen tyyli"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking__activity_state
@@ -650,7 +650,7 @@ msgstr "Osoite, jonne tavarat toimitetaan. Valinnainen."
 #. module: stock
 #: model:res.groups,name:stock.group_stock_manager
 msgid "Administrator"
-msgstr ""
+msgstr "Hallinnoija"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -1085,6 +1085,12 @@ msgid "Changing the operation type of this record is forbidden at this point."
 msgstr ""
 
 #. module: stock
+#: code:addons/stock/models/stock_move_line.py:0
+#, python-format
+msgid "Changing the product is only allowed in 'Draft' state."
+msgstr "Tuotteen vaihtaminen on sallittu vain luonnostilassa"
+
+#. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
 msgid "Check Availability"
 msgstr "Tarkista saatavuus"
@@ -1130,6 +1136,13 @@ msgstr "Valitse kohteen sijainti"
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_quantity_history
 msgid "Choose your date"
 msgstr "Valitse päivämäärä"
+
+#. module: stock
+#. openerp-web
+#: code:addons/stock/static/src/xml/stock_traceability_report_backend.xml:0
+#, python-format
+msgid "Close"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_type__sequence_code
@@ -2485,7 +2498,7 @@ msgstr "Kuvake"
 #: model:ir.model.fields,help:stock.field_stock_picking__activity_exception_icon
 #: model:ir.model.fields,help:stock.field_stock_production_lot__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "Ikoni joka kertoo poikkeustoiminnosta."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__message_needaction
@@ -3749,6 +3762,8 @@ msgid "Number of unread messages"
 msgstr "Lukemattomia viestejä"
 
 #. module: stock
+#: model:ir.model.fields,field_description:stock.field_stock_quant__on_hand
+#: model_terms:ir.ui.view,arch_db:stock.quant_search_view
 #: model_terms:ir.ui.view,arch_db:stock.stock_inventory_line_tree2
 msgid "On Hand"
 msgstr "Varastossa"
@@ -3804,6 +3819,12 @@ msgstr "Palautustyyppi"
 #: model_terms:ir.ui.view,arch_db:stock.view_warehouse
 msgid "Operation Types"
 msgstr "Toimintatyypit"
+
+#. module: stock
+#: code:addons/stock/models/stock_quant.py:0
+#, python-format
+msgid "Operation not supported"
+msgstr ""
 
 #. module: stock
 #: model:ir.actions.report,name:stock.action_report_picking_type_label
@@ -5211,7 +5232,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_stock_production_lot__message_has_sms_error
 #: model:ir.model.fields,field_description:stock.field_stock_scrap__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "Tekstiviestin toimitusvirhe"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_product_replenish__date_planned
@@ -6497,6 +6518,7 @@ msgstr "Seurantalinja"
 
 #. module: stock
 #: model:ir.model,name:stock.model_stock_picking
+#: model_terms:ir.ui.view,arch_db:stock.stock_move_line_view_search
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Transfer"
@@ -6563,6 +6585,11 @@ msgid "Trigger Another Rule"
 msgstr "Käynnistä toinen sääntö"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.report_stock_rule
+msgid "Trigger Another Rule If No Stock"
+msgstr ""
+
+#. module: stock
 #: model:ir.model.fields,field_description:stock.field_barcode_rule__type
 msgid "Type"
 msgstr "Tyyppi"
@@ -6581,7 +6608,7 @@ msgstr "Toiminnon tyyppi"
 #: model:ir.model.fields,help:stock.field_stock_picking__activity_exception_decoration
 #: model:ir.model.fields,help:stock.field_stock_production_lot__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr ""
+msgstr "Poikkeusaktiviteetin tyyppi tietueella"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_ups
@@ -7096,7 +7123,7 @@ msgid "Wizard"
 msgstr "Ohjattu toiminto"
 
 #. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.view_stock_move_line_operation_tree_lot_name_as_textarea
+#: model_terms:ir.ui.view,arch_db:stock.view_stock_move_line_operation_tree
 msgid "Write your SN/LN one by one or copy paste a list."
 msgstr ""
 
@@ -7554,9 +7581,3 @@ msgstr "käsitelty"
 #: model_terms:ir.ui.view,arch_db:stock.stock_report_view_graph
 msgid "report_stock_quantity_graph"
 msgstr ""
-
-#. module: stock
-#: code:addons/stock/models/stock_move_line.py:223
-#, python-format
-msgid "Changing the product is only allowed in 'Draft' state."
-msgstr "Tuotteen vaihtaminen on sallittu vain luonnostilassa"
