@@ -88,10 +88,9 @@ class StatusController(http.Controller):
                 helpers.add_credential(db_uuid, enterprise_code)
             try:
                 subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server.sh'), url, '', token, 'noreboot'])
-                helpers.check_certificate()
                 m.send_alldevices()
-                m.load_drivers()
                 image = get_resource_path('hw_drivers', 'static/img', 'True.jpg')
+                helpers.odoo_restart(3)
             except subprocess.CalledProcessError as e:
                 _logger.error('A error encountered : %s ' % e.output)
         if os.path.isfile(image):
@@ -112,7 +111,7 @@ class ExceptionLogger:
 
     def write(self, message):
         if message != '\n':
-            self.logger.err(message)
+            self.logger.error(message)
 
     def flush(self):
         pass
@@ -331,15 +330,17 @@ class Manager(Thread):
         x_screen = 0
         for match in finditer('Display Number (\d), type HDMI (\d)', displays):
             display_id, hdmi_id = match.groups()
-            display_name = subprocess.check_output(['tvservice', '-nv', display_id]).decode().rstrip().split('=')[1]
-            display_identifier = sub('[^a-zA-Z0-9 ]+', '', display_name).replace(' ', '_') + "_" + str(hdmi_id)
-            iot_device = IoTDevice({
-                'identifier': display_identifier,
-                'name': display_name,
-                'x_screen': str(x_screen),
-            }, 'display')
-            display_devices[display_identifier] = iot_device
-            x_screen += 1
+            tvservice_output = subprocess.check_output(['tvservice', '-nv', display_id]).decode().rstrip()
+            if tvservice_output:
+                display_name = tvservice_output.split('=')[1]
+                display_identifier = sub('[^a-zA-Z0-9 ]+', '', display_name).replace(' ', '_') + "_" + str(hdmi_id)
+                iot_device = IoTDevice({
+                    'identifier': display_identifier,
+                    'name': display_name,
+                    'x_screen': str(x_screen),
+                }, 'display')
+                display_devices[display_identifier] = iot_device
+                x_screen += 1
 
         if not len(display_devices):
             # No display connected, create "fake" device to be accessed from another computer
