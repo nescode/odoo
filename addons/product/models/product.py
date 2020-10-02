@@ -309,7 +309,12 @@ class ProductProduct(models.Model):
                 '&', ('product_id', '=', product.id), ('applied_on', '=', '0_product_variant')]
             product.pricelist_item_count = self.env['product.pricelist.item'].search_count(domain)
 
-    @api.onchange('uom_id', 'uom_po_id')
+    @api.onchange('uom_id')
+    def _onchange_uom_id(self):
+        if self.uom_id:
+            self.uom_po_id = self.uom_id.id
+
+    @api.onchange('uom_po_id')
     def _onchange_uom(self):
         if self.uom_id and self.uom_po_id and self.uom_id.category_id != self.uom_po_id.category_id:
             self.uom_po_id = self.uom_id
@@ -667,9 +672,6 @@ class ProductProduct(models.Model):
 
         See `_is_combination_possible` for more information.
 
-        This will always exclude variants for templates that have `no_variant`
-        attributes because the variant itself will not be the full combination.
-
         :param parent_combination: combination from which `self` is an
             optional or accessory product.
         :type parent_combination: recordset `product.template.attribute.value`
@@ -678,7 +680,7 @@ class ProductProduct(models.Model):
         :rtype: bool
         """
         self.ensure_one()
-        return self.product_tmpl_id._is_combination_possible(self.product_template_attribute_value_ids, parent_combination=parent_combination)
+        return self.product_tmpl_id._is_combination_possible(self.product_template_attribute_value_ids, parent_combination=parent_combination, ignore_no_variant=True)
 
     def toggle_active(self):
         """ Archiving related product.template if there is only one active product.product """

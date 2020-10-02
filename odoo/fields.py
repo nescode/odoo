@@ -989,10 +989,8 @@ class Field(MetaField('DummyField', (object,), {})):
             if self.recursive:
                 recs = record
             else:
-                recs = env.records_to_compute(self)
-                # compute the field on real records only (if 'record' is real)
-                # or new records only (if 'record' is new)
-                recs = recs.filtered(lambda rec: bool(rec.id) == bool(record.id))
+                ids = expand_ids(record.id, env.all.tocompute[self])
+                recs = record.browse(itertools.islice(ids, PREFETCH_MAX))
             try:
                 self.compute_value(recs)
             except (AccessError, MissingError):
@@ -1580,7 +1578,7 @@ class Html(_String):
         (only a white list of attributes is accepted, default: ``True``)
     :param bool sanitize_attributes: whether to sanitize attributes
         (only a white list of attributes is accepted, default: ``True``)
-    :param bool sanitize_style: whether to sanitize style attributes (default: ``True``)
+    :param bool sanitize_style: whether to sanitize style attributes (default: ``False``)
     :param bool strip_style: whether to strip style attributes
         (removed and therefore not sanitized, default: ``False``)
     :param bool strip_classes: whether to strip classes attributes (default: ``False``)
@@ -1869,6 +1867,12 @@ class Binary(Field):
     @property
     def column_type(self):
         return None if self.attachment else ('bytea', 'bytea')
+
+    def _get_attrs(self, model, name):
+        attrs = super(Binary, self)._get_attrs(model, name)
+        if not attrs.get('store', True):
+            attrs['attachment'] = False
+        return attrs
 
     _description_attachment = property(attrgetter('attachment'))
 
@@ -2563,9 +2567,13 @@ class Many2one(_Relational):
         """ Remove `records` from the cached values of the inverse fields of `self`. """
         cache = records.env.cache
         record_ids = set(records._ids)
+
+        # align(id) returns a NewId if records are new, a real id otherwise
+        align = (lambda id_: id_) if all(record_ids) else (lambda id_: id_ and NewId(id_))
+
         for invf in records._field_inverses[self]:
             corecords = records.env[self.comodel_name].browse(
-                id_ for id_ in cache.get_values(records, self)
+                align(id_) for id_ in cache.get_values(records, self)
             )
             for corecord in corecords:
                 ids0 = cache.get(corecord, invf, None)
@@ -3077,6 +3085,11 @@ class One2many(_RelationalMulti):
 
         if self.store:
             inverse = self.inverse_name
+
+            # make sure self's inverse is in cache
+            inverse_field = comodel._fields[inverse]
+            for record in records:
+                cache.update(record[self.name], inverse_field, itertools.repeat(record.id))
 
             for recs, commands in records_commands_list:
                 for command in commands:
@@ -3636,4 +3649,4 @@ def apply_required(model, field_name):
 
 # imported here to avoid dependency cycle issues
 from .exceptions import AccessError, MissingError, UserError
-from .models import check_pg_name, BaseModel, NewId, IdType
+from .models import check_pg_name, BaseModel, NewId, IdType, expand_ids, PREFETCH_MAX
