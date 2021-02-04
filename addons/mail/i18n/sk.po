@@ -3,7 +3,6 @@
 # 	* mail
 # 
 # Translators:
-# palica <pavol.cupka@gmail.com>, 2019
 # Radoslav Sloboda <rado.sloboda@gmail.com>, 2019
 # Robert Kirschner <robertkirschner@yahoo.com>, 2019
 # Martin Trigaux, 2019
@@ -15,6 +14,7 @@
 # Stefan Stieranka <stieranka@itec.sk>, 2020
 # Michal Matus <misko.matus@gmail.com>, 2020
 # Filip Brenčič <brencicf5@gmail.com>, 2020
+# karolína schusterová <karolina.schusterova@vdp.sk>, 2020
 # Alexandra Brencicova <alexandra.brencicova@gmail.com>, 2020
 # Rastislav Brencic <rastislav.brencic@azet.sk>, 2020
 # 
@@ -1103,7 +1103,7 @@ msgstr "CC Email"
 #. module: mail
 #: model:mail.activity.type,name:mail.mail_activity_data_call
 msgid "Call"
-msgstr "Volať"
+msgstr "Telefonát"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity__can_write
@@ -1384,7 +1384,7 @@ msgstr "Nastavenie konfigurácie"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid "Configure your activity types"
-msgstr "Konfiguruj svoje typy aktivít"
+msgstr "Nastavenie typov aktivít"
 
 #. module: mail
 #. openerp-web
@@ -1578,6 +1578,12 @@ msgid "Customer is required for inbox / email notification"
 msgstr "Od zákazníka je vyžadovaná notifikácia doručenej pošty alebo e-mailom"
 
 #. module: mail
+#: code:addons/mail/models/mail_notification.py:0
+#, python-format
+msgid "Can not update the message or recipient of a notification."
+msgstr ""
+
+#. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__date
 #: model:ir.model.fields,field_description:mail.field_mail_message__date
 #: model_terms:ir.ui.view,arch_db:mail.view_mail_search
@@ -1594,7 +1600,7 @@ msgstr "Dátum"
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__ir_actions_server__activity_date_deadline_range_type__days
 msgid "Days"
-msgstr "Dní"
+msgstr "Dni"
 
 #. module: mail
 #. openerp-web
@@ -2236,7 +2242,7 @@ msgstr "Chyba: Sledujúci musí byť buď partner alebo kanál (nemôžu byť ob
 #: model:ir.model.fields.selection,name:mail.selection__mail_alias__alias_contact__everyone
 #: model:ir.model.fields.selection,name:mail.selection__mail_channel__public__public
 msgid "Everyone"
-msgstr "Každý"
+msgstr "Všetci"
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_notification__notification_status__exception
@@ -2447,6 +2453,12 @@ msgstr "Iba odberatelia"
 #, python-format
 msgid "Following"
 msgstr "Odberajúci"
+
+#. module: mail
+#: code:addons/mail/models/mail_channel.py:778
+#, python-format
+msgid "Following invites are invalid as user groups do not match: %s"
+msgstr ""
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_activity__icon
@@ -3410,7 +3422,7 @@ msgstr "Označiť ako hotovo"
 #: code:addons/mail/static/src/xml/thread.xml:0
 #, python-format
 msgid "Mark as todo"
-msgstr ""
+msgstr "Označiť ako úloha"
 
 #. module: mail
 #: model:ir.ui.menu,name:mail.mail_blacklist_menu
@@ -4351,7 +4363,7 @@ msgstr "Voliteľná hodnota použitá v prípade že cieľové pole je prázdne"
 #: code:addons/mail/static/src/js/models/threads/dm_chat.js:0
 #, python-format
 msgid "Out of office until %s"
-msgstr ""
+msgstr "Mimo kancelárie do %s"
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_mail__state__outgoing
@@ -4631,7 +4643,7 @@ msgstr "Uverejnite svoju správu vo vlákne"
 #: model_terms:ir.ui.view,arch_db:mail.mail_notification_light
 #: model_terms:ir.ui.view,arch_db:mail.mail_notification_paynow
 msgid "Powered by"
-msgstr "Poháňané"
+msgstr "Prináša vám"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_activity_type__previous_type_ids
@@ -5622,6 +5634,12 @@ msgstr ""
 "užívateľ systému nájdený pre danú adresu."
 
 #. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "The partner can not join this channel"
+msgstr ""
+
+#. module: mail
 #: code:addons/mail/models/mail_message.py:0
 #: code:addons/mail/models/mail_message.py:0
 #, python-format
@@ -5993,7 +6011,7 @@ msgstr "Nepodporovaný vyhľadávací filter statusu moderácie"
 #: model:mail.activity.type,name:mail.mail_activity_data_upload_document
 #, python-format
 msgid "Upload Document"
-msgstr ""
+msgstr "Nahrať dokument"
 
 #. module: mail
 #. openerp-web
@@ -6096,7 +6114,7 @@ msgstr ""
 #: code:addons/mail/static/src/xml/discuss.xml:0
 #, python-format
 msgid "User is online"
-msgstr ""
+msgstr "Používateľ je online"
 
 #. module: mail
 #. openerp-web
@@ -6346,6 +6364,24 @@ msgstr ""
 "mailovej schránke."
 
 #. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "You can not remove this partner from this channel"
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "You can not write on the record of other users"
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/models/mail_channel.py:0
+#, python-format
+msgid "You can not write on this field"
+msgstr ""
+
+#. module: mail
 #: code:addons/mail/models/res_users.py:0
 #, python-format
 msgid ""
@@ -6396,8 +6432,8 @@ msgstr "Boli ste priradení k"
 #. openerp-web
 #: code:addons/mail/static/src/js/services/mail_notification_manager.js:0
 #, python-format
-msgid "You have been invited to: "
-msgstr "Boli ste pozvaný do:"
+msgid "You have been invited to: %s"
+msgstr ""
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_notify_moderation

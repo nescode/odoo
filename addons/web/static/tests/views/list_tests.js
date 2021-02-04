@@ -1335,8 +1335,8 @@ QUnit.module('Views', {
 
         await testUtils.dom.click(list.$('.o_group_header:first()'));
 
-        assert.ok(list.$('thead .o_list_record_selector input')[0].checked,
-            "Head selector should be checked");
+        assert.ok(!list.$('thead .o_list_record_selector input')[0].checked,
+            "Head selector should be unchecked");
 
         list.destroy();
     });
@@ -3625,6 +3625,30 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test('editable list view, click on m2o dropdown do not close editable row', async function (assert) {
+        assert.expect(2);
+
+        const list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree string="Phonecalls" editable="top">' +
+                '<field name="m2o"/>' +
+                '</tree>',
+        });
+
+        await testUtils.dom.click(list.$buttons.find('.o_list_button_add'));
+        await testUtils.dom.click(list.$('.o_selected_row .o_data_cell .o_field_many2one input'));
+        const $dropdown = list.$('.o_selected_row .o_data_cell .o_field_many2one input').autocomplete('widget');
+        await testUtils.dom.click($dropdown);
+        assert.containsOnce(list, '.o_selected_row', "should still have editable row");
+
+        await testUtils.dom.click($dropdown.find("li:first"));
+        assert.containsOnce(list, '.o_selected_row', "should still have editable row");
+
+        list.destroy();
+    });
+
     QUnit.test('click on a button in a list view', async function (assert) {
         assert.expect(9);
 
@@ -5655,6 +5679,57 @@ QUnit.module('Views', {
         assert.verifySteps(['bar', 'res_currency'], "should have done 1 name_get by model in reference values");
         assert.strictEqual(list.$('tbody td:not(.o_list_record_selector)').text(), "Value 1USDEUREUR",
             "should have the display_name of the reference");
+        list.destroy();
+    });
+
+    QUnit.test('reference field batched in grouped list', async function (assert) {
+        assert.expect(7);
+
+        this.data.foo.records= [
+            // group 1
+            {id: 1, foo: '1', reference: 'bar,1'},
+            {id: 2, foo: '1', reference: 'bar,2'},
+            {id: 3, foo: '1', reference: 'res_currency,1'},
+            //group 2
+            {id: 4, foo: '2', reference: 'bar,2'},
+            {id: 5, foo: '2', reference: 'bar,3'},
+        ];
+        const list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: `<tree expand="1">
+                       <field name="foo" invisible="1"/>
+                       <field name="reference"/>
+                   </tree>`,
+            groupBy: ['foo'],
+            mockRPC: function (route, args) {
+                assert.step(args.method || route);
+                if (args.method === 'name_get') {
+                    if (args.model === 'bar') {
+                        assert.deepEqual(args.args[0], [1, 2 ,3]);
+                    }
+                    if (args.model === "res.currency") {
+                        assert.deepEqual(args.args[0], [1]);
+                    }
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+        assert.verifySteps([
+            'web_read_group',
+            'name_get',
+            'name_get',
+        ]);
+        assert.containsN(list, '.o_group_header', 2);
+        const allNames = Array.from(list.el.querySelectorAll('.o_data_cell'), node => node.textContent);
+        assert.deepEqual(allNames, [
+            'Value 1',
+            'Value 2',
+            'USD',
+            'Value 2',
+            'Value 3',
+        ]);
         list.destroy();
     });
 
@@ -8479,10 +8554,10 @@ QUnit.module('Views', {
         assert.containsOnce(list.$('table'), '.o_optional_columns_dropdown_toggle',
             "should have the optional columns dropdown toggle inside the table");
 
-        const optionalFieldsToggler = list.el.querySelector('table').lastElementChild.previousSibling;
+        const optionalFieldsToggler = list.el.querySelector('table').lastElementChild;
         assert.ok(optionalFieldsToggler.classList.contains('o_optional_columns_dropdown_toggle'),
             'The optional fields toggler is the second last element');
-        const optionalFieldsDropdown = list.el.querySelector('table').lastElementChild;
+        const optionalFieldsDropdown = list.el.querySelector('.o_list_view').lastElementChild;
         assert.ok(optionalFieldsDropdown.classList.contains('o_optional_columns'),
             'The optional fields dropdown is the last element');
 
@@ -8547,10 +8622,10 @@ QUnit.module('Views', {
         assert.containsOnce(list.$('table'), '.o_optional_columns_dropdown_toggle',
             "should have the optional columns dropdown toggle inside the table");
 
-        const optionalFieldsToggler = list.el.querySelector('table').lastElementChild.previousSibling;
+        const optionalFieldsToggler = list.el.querySelector('table').lastElementChild;
         assert.ok(optionalFieldsToggler.classList.contains('o_optional_columns_dropdown_toggle'),
             'The optional fields toggler is the last element');
-        const optionalFieldsDropdown = list.el.querySelector('table').lastElementChild;
+        const optionalFieldsDropdown = list.el.querySelector('.o_list_view').lastElementChild;
         assert.ok(optionalFieldsDropdown.classList.contains('o_optional_columns'),
             'The optional fields is the last element');
 

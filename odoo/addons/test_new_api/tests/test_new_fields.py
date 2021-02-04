@@ -193,6 +193,32 @@ class TestFields(common.TransactionCase):
             sum(invalid_transitive_depends in field_triggers.get(None, []) for field_triggers in triggers.values()), 1
         )
 
+    @mute_logger('odoo.fields')
+    def test_10_computed_stored_x_name(self):
+        # create a custom model with two fields
+        self.env["ir.model"].create({
+            "name": "x_test_10_compute_store_x_name",
+            "model": "x_test_10_compute_store_x_name",
+            "field_id": [
+                (0, 0, {'name': 'x_name', 'ttype': 'char'}),
+                (0, 0, {'name': 'x_stuff_id', 'ttype': 'many2one', 'relation': 'ir.model'}),
+            ],
+        })
+        # set 'x_stuff_id' refer to a model not loaded yet
+        self.cr.execute("""
+            UPDATE ir_model_fields
+            SET relation = 'not.loaded'
+            WHERE model = 'x_test_10_compute_store_x_name' AND name = 'x_stuff_id'
+        """)
+        # set 'x_name' be computed and depend on 'x_stuff_id'
+        self.cr.execute("""
+            UPDATE ir_model_fields
+            SET compute = 'pass', depends = 'x_stuff_id.x_custom_1'
+            WHERE model = 'x_test_10_compute_store_x_name' AND name = 'x_name'
+        """)
+        # setting up models should not crash
+        self.registry.setup_models(self.cr)
+
     def test_10_display_name(self):
         """ test definition of automatic field 'display_name' """
         field = type(self.env['test_new_api.discussion']).display_name
@@ -380,20 +406,42 @@ class TestFields(common.TransactionCase):
         b = self.env['test_new_api.recursive'].create({'name': 'B', 'parent': a.id})
         c = self.env['test_new_api.recursive'].create({'name': 'C', 'parent': b.id})
         d = self.env['test_new_api.recursive'].create({'name': 'D', 'parent': c.id})
+        self.assertEqual(a.full_name, 'A')
+        self.assertEqual(b.full_name, 'A / B')
+        self.assertEqual(c.full_name, 'A / B / C')
+        self.assertEqual(d.full_name, 'A / B / C / D')
         self.assertEqual(a.display_name, 'A')
         self.assertEqual(b.display_name, 'A / B')
         self.assertEqual(c.display_name, 'A / B / C')
         self.assertEqual(d.display_name, 'A / B / C / D')
 
+        a.name = 'A1'
+        self.assertEqual(a.full_name, 'A1')
+        self.assertEqual(b.full_name, 'A1 / B')
+        self.assertEqual(c.full_name, 'A1 / B / C')
+        self.assertEqual(d.full_name, 'A1 / B / C / D')
+        self.assertEqual(a.display_name, 'A1')
+        self.assertEqual(b.display_name, 'A1 / B')
+        self.assertEqual(c.display_name, 'A1 / B / C')
+        self.assertEqual(d.display_name, 'A1 / B / C / D')
+
         b.parent = False
-        self.assertEqual(a.display_name, 'A')
+        self.assertEqual(a.full_name, 'A1')
+        self.assertEqual(b.full_name, 'B')
+        self.assertEqual(c.full_name, 'B / C')
+        self.assertEqual(d.full_name, 'B / C / D')
+        self.assertEqual(a.display_name, 'A1')
         self.assertEqual(b.display_name, 'B')
         self.assertEqual(c.display_name, 'B / C')
         self.assertEqual(d.display_name, 'B / C / D')
 
         # rename several records to trigger several recomputations at once
         (d + c + b).write({'name': 'X'})
-        self.assertEqual(a.display_name, 'A')
+        self.assertEqual(a.full_name, 'A1')
+        self.assertEqual(b.full_name, 'X')
+        self.assertEqual(c.full_name, 'X / X')
+        self.assertEqual(d.full_name, 'X / X / X')
+        self.assertEqual(a.display_name, 'A1')
         self.assertEqual(b.display_name, 'X')
         self.assertEqual(c.display_name, 'X / X')
         self.assertEqual(d.display_name, 'X / X / X')
@@ -402,6 +450,14 @@ class TestFields(common.TransactionCase):
         # to recompute, but recomputation should not fail...
         b.unlink()
         self.assertEqual((a + b + c + d).exists(), a)
+
+    def test_12_recursive_tree(self):
+        foo = self.env['test_new_api.recursive.tree'].create({'name': 'foo'})
+        self.assertEqual(foo.display_name, 'foo()')
+        bar = foo.create({'name': 'bar', 'parent_id': foo.id})
+        self.assertEqual(foo.display_name, 'foo(bar())')
+        baz = foo.create({'name': 'baz', 'parent_id': bar.id})
+        self.assertEqual(foo.display_name, 'foo(bar(baz()))')
 
     def test_12_cascade(self):
         """ test computed field depending on computed field """
@@ -443,7 +499,6 @@ class TestFields(common.TransactionCase):
         (foo1 + foo2).write({'display_name': 'Bar'})
         self.assertEqual(foo1.name, 'Bar')
         self.assertEqual(foo2.name, 'Bar')
-
 
         # create/write on 'foo' should only invoke the compute method
         log = []
@@ -520,16 +575,6 @@ class TestFields(common.TransactionCase):
         with self.assertRaises(AccessError):
             foo.with_user(user).display_name = 'Forbidden'
 
-    def test_13_inverse_access(self):
-        """ test access rights on inverse fields """
-        foo = self.env['test_new_api.category'].create({'name': 'Foo'})
-        user = self.env['res.users'].create({'name': 'Foo', 'login': 'foo'})
-        self.assertFalse(user.has_group('base.group_system'))
-        # add group on non-stored inverse field
-        self.patch(type(foo).display_name, 'groups', 'base.group_system')
-        with self.assertRaises(AccessError):
-            foo.with_user(user).display_name = 'Forbidden'
-
     def test_14_search(self):
         """ test search on computed fields """
         discussion = self.env.ref('test_new_api.discussion_0')
@@ -572,6 +617,38 @@ class TestFields(common.TransactionCase):
         with self.assertRaises(ValidationError):
             discussion.name = "X"
             discussion.flush()
+
+    def test_15_constraint_inverse(self):
+        """ test constraint method on normal field and field with inverse """
+        log = []
+        model = self.env['test_new_api.compute.inverse'].with_context(log=log, log_constraint=True)
+
+        # create/write with normal field only
+        log.clear()
+        record = model.create({'baz': 'Hi'})
+        self.assertCountEqual(log, ['constraint'])
+
+        log.clear()
+        record.write({'baz': 'Ho'})
+        self.assertCountEqual(log, ['constraint'])
+
+        # create/write with inverse field only
+        log.clear()
+        record = model.create({'bar': 'Hi'})
+        self.assertCountEqual(log, ['inverse', 'constraint'])
+
+        log.clear()
+        record.write({'bar': 'Ho'})
+        self.assertCountEqual(log, ['inverse', 'constraint'])
+
+        # create/write with both fields only
+        log.clear()
+        record = model.create({'bar': 'Hi', 'baz': 'Hi'})
+        self.assertCountEqual(log, ['inverse', 'constraint'])
+
+        log.clear()
+        record.write({'bar': 'Ho', 'baz': 'Ho'})
+        self.assertCountEqual(log, ['inverse', 'constraint'])
 
     def test_20_float(self):
         """ test rounding of float fields """
@@ -1012,6 +1089,32 @@ class TestFields(common.TransactionCase):
         bar.name = 'B'
         self.assertEqual(bar.foo, oof)
         self.assertIn(bar, bar.search([('foo', 'in', oof.ids)]))
+
+    def test_25_one2many_inverse_related(self):
+        left = self.env['test_new_api.trigger.left'].create({})
+        right = self.env['test_new_api.trigger.right'].create({})
+        self.assertFalse(left.right_id)
+        self.assertFalse(right.left_ids)
+        self.assertFalse(right.left_size)
+
+        # create middle: this should trigger left.right_id by traversing
+        # middle.left_id, and right.left_size by traversing left.right_id
+        # after its computation!
+        middle = self.env['test_new_api.trigger.middle'].create({
+            'left_id': left.id,
+            'right_id': right.id,
+        })
+        self.assertEqual(left.right_id, right)
+        self.assertEqual(right.left_ids, left)
+        self.assertEqual(right.left_size, 1)
+
+        # delete middle: this should trigger left.right_id by traversing
+        # middle.left_id, and right.left_size by traversing left.right_id
+        # before its computation!
+        middle.unlink()
+        self.assertFalse(left.right_id)
+        self.assertFalse(right.left_ids)
+        self.assertFalse(right.left_size)
 
     def test_26_inherited(self):
         """ test inherited fields. """
@@ -1814,10 +1917,21 @@ class TestFields(common.TransactionCase):
         self.assertEqual(image_data_uri(record.image_256)[:30], 'data:image/png;base64,iVBORw0K')
 
         # ensure invalid image raises
-        with self.assertRaises(UserError):
+        with self.assertRaises(UserError), self.cr.savepoint():
             record.write({
                 'image': 'invalid image',
             })
+
+        # assignment of invalid image on new record does nothing, the value is
+        # taken from origin instead (use-case: onchange)
+        new_record = record.new(origin=record)
+        new_record.image = '31.54 Kb'
+        self.assertEqual(record.image, image_h)
+        self.assertEqual(new_record.image, image_h)
+
+        # assignment to new record with origin should not do any query
+        with self.assertQueryCount(0):
+            new_record.image = image_w
 
     def test_95_binary_bin_size(self):
         binary_value = base64.b64encode(b'content')

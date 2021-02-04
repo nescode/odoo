@@ -12335,6 +12335,12 @@ msgstr "이름만으로는 새 '%s' 레코드를 만들 수 없습니다. 이러
 #. module: base
 #: code:addons/base/models/res_lang.py:0
 #, python-format
+msgid "Cannot deactivate a language that is currently used by contacts."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/res_lang.py:0
+#, python-format
 msgid "Cannot deactivate a language that is currently used by users."
 msgstr "현재 사용자가 사용하고 있는 언어는 비활성화할 수 없습니다."
 
@@ -22947,6 +22953,12 @@ msgid ""
 msgstr "사용하려는 문서 중 하나가 삭제되었습니다. 새로 고침 후 다시 시도하십시오."
 
 #. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid "One of the documents, you try to merge is encrypted"
+msgstr ""
+
+#. module: base
 #: code:addons/models.py:0
 #, python-format
 msgid ""
@@ -28073,14 +28085,6 @@ msgid ""
 msgstr ""
 "이 작업은 다음 그룹에만 허용됩니다 :\n"
 "%(groups_list)s"
-
-#. module: base
-#: code:addons/base/ir/ir_sequence.py:56
-#, python-format
-msgid ""
-"This transaction wasn't executed because another transaction is already "
-"using the same no-gap sequence. Please try again later."
-msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang__thousands_sep

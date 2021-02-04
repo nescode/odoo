@@ -203,6 +203,7 @@ class Attendee(models.Model):
                 email_values = {
                     'model': None,  # We don't want to have the mail in the tchatter while in queue!
                     'res_id': None,
+                    'author_id': attendee.event_id.user_id.partner_id.id or self.env.user.partner_id.id,
                 }
                 if ics_file:
                     email_values['attachment_ids'] = [
@@ -881,7 +882,7 @@ class Meeting(models.Model):
                 meeting.stop_date = meeting.stop.date()
                 meeting.stop_datetime = False
 
-                meeting.duration = 0.0
+                meeting.duration = self._get_duration(meeting.start, meeting.stop)
             else:
                 meeting.start_date = False
                 meeting.start_datetime = meeting.start
@@ -984,8 +985,9 @@ class Meeting(models.Model):
         def ics_datetime(idate, allday=False):
             if idate:
                 if allday:
-                    return idate
+                    return fields.Date.to_date(idate)
                 else:
+                    idate = fields.Datetime.to_datetime(idate)
                     return idate.replace(tzinfo=pytz.timezone('UTC'))
             return False
 
@@ -1121,6 +1123,9 @@ class Meeting(models.Model):
 
         if 'id' not in order_fields:
             order_fields.append('id')
+
+        # code does not handle '!' operator
+        domain = expression.distribute_not(expression.normalize_domain(domain))
 
         leaf_evaluations = None
         recurrent_ids = [meeting.id for meeting in self if meeting.recurrency and meeting.rrule]
@@ -1651,7 +1656,7 @@ class Meeting(models.Model):
             if real_id != calendar_id:
                 calendar = self.browse(calendar_id)
                 real = self.browse(real_id)
-                ls = calendar_id2real_id(calendar_id, with_date=True)
+                ls = calendar_id2real_id(calendar_id, with_date=real.duration or 1)
                 for field in fields:
                     f = self._fields[field]
                     if field in ('start', 'start_date', 'start_datetime'):
@@ -1769,7 +1774,7 @@ class Meeting(models.Model):
         new_args = []
         for arg in args:
             new_arg = arg
-            if arg[0] in ('stop_date', 'stop_datetime', 'stop',) and arg[1] == ">=":
+            if arg[0] in ('stop_date', 'stop_datetime', 'stop',) and arg[1] in ('>=', '>', '=',):
                 if self._context.get('virtual_id', True):
                     new_args += ['|', '&', ('recurrency', '=', 1), ('final_date', arg[1], arg[2])]
             elif arg[0] == "id":

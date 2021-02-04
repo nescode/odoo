@@ -7,9 +7,9 @@
 # Cozmin Candea <office@terrabit.ro>, 2020
 # Fekete Mihai <mihai.fekete@forestandbiomass.ro>, 2020
 # Martin Trigaux, 2020
-# Foldi Robert <foldirobert@nexterp.ro>, 2020
-# Dorin Hongu <dhongu@gmail.com>, 2020
 # Hongu Cosmin <cosmin513@gmail.com>, 2020
+# Dorin Hongu <dhongu@gmail.com>, 2020
+# Foldi Robert <foldirobert@nexterp.ro>, 2021
 # 
 msgid ""
 msgstr ""
@@ -17,7 +17,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-23 15:12+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Hongu Cosmin <cosmin513@gmail.com>, 2020\n"
+"Last-Translator: Foldi Robert <foldirobert@nexterp.ro>, 2021\n"
 "Language-Team: Romanian (https://www.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -851,6 +851,8 @@ msgid ""
 "        This bridge module allows to manage subcontracting with the dropshipping module.\n"
 "    "
 msgstr ""
+"\n"
+"Acest modul punte permite gestionarea subcontractării cu modulul livrare directă."
 
 #. module: base
 #: model:ir.module.module,description:base.module_mrp_subcontracting_account
@@ -3538,6 +3540,13 @@ msgid ""
 "internal transfer document is needed.\n"
 "\n"
 msgstr ""
+"\n"
+"Gestionați comenzile cu livrare directă\n"
+"=========================================\n"
+"\n"
+"Acest modul adaugă un tip de operațiune Drop Shipping  preconfigurat, precum și o rută de achiziție care permite configurarea produselor și comenzilor Drop Shipping.\n"
+"\n"
+"Atunci când se utilizează livrarea directă, mărfurile sunt transferate direct de la furnizori către clienți fără a trece prin depozitul retailerului. În acest caz nu este necesar niciun document de transfer intern.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_expense
@@ -6619,7 +6628,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
 msgid "1. %b, %B         ==&gt; Dec, December"
-msgstr "4.  %b, %B ==> Dec, Decembrie"
+msgstr "1.  %b, %B ==&gt;  Dec, Decembrie"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
@@ -6639,7 +6648,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
 msgid "2. %a ,%A         ==&gt; Fri, Friday"
-msgstr "2.  %a ,%A ==> Vin, Vineri"
+msgstr "2.  %a ,%A ==&gt;  Vin, Vineri"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.layout_preview
@@ -9615,6 +9624,12 @@ msgstr ""
 #. module: base
 #: code:addons/base/models/res_lang.py:0
 #, python-format
+msgid "Cannot deactivate a language that is currently used by contacts."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/res_lang.py:0
+#, python-format
 msgid "Cannot deactivate a language that is currently used by users."
 msgstr "Nu se poate dezactiva o limbă utilizată în prezent de utilizatori."
 
@@ -10536,7 +10551,7 @@ msgstr "Nu a putut fi creat contactul fără adresă de email!"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model__count
 msgid "Count (Incl. Archived)"
-msgstr ""
+msgstr "Număr (incl. arhivate)"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_country
@@ -11078,7 +11093,7 @@ msgstr "Personalizat"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__custom_colors
 msgid "Custom Colors"
-msgstr ""
+msgstr "Culoare Personalizată"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__state__manual
@@ -12030,7 +12045,7 @@ msgstr "Meniul derulant"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_subcontracting_dropshipping
 msgid "Dropship and Subcontracting Management"
-msgstr ""
+msgstr "Gestionare subcontractare și livrare directă"
 
 #. module: base
 #: code:addons/base/models/res_company.py:0
@@ -14104,8 +14119,8 @@ msgid ""
 "Helps you manage your projects and tasks by tracking them, generating "
 "plannings, etc..."
 msgstr ""
-"Va ajuta sa va gestionati proiectele si sarcinile prin monitorizarea lor, "
-"generarea de planificari, etc..."
+"Vă ajută să vă gestionați proiectele și sarcinile prin monitorizarea lor, "
+"generarea de planificări, etc..."
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_operations_purchase
@@ -15902,7 +15917,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_iap_lead
 msgid "Lead Generation"
-msgstr ""
+msgstr "Generare Pistă"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_crm_iap_lead_website
@@ -16203,12 +16218,12 @@ msgstr "Sigla"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__logo_primary_color
 msgid "Logo Primary Color"
-msgstr ""
+msgstr "Culoare primară siglă"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__logo_secondary_color
 msgid "Logo Secondary Color"
-msgstr ""
+msgstr "Logo Culoare secundară"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__logo_web
@@ -16738,7 +16753,7 @@ msgstr ""
 #: model:ir.module.module,shortdesc:base.module_mrp_mps
 #: model:ir.module.module,summary:base.module_mrp_mps
 msgid "Master Production Schedule"
-msgstr ""
+msgstr "Program Producție Master"
 
 #. module: base
 #: model:res.country,name:base.mr
@@ -19015,6 +19030,12 @@ msgstr ""
 "încercați din nou după reîmprospătare."
 
 #. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid "One of the documents, you try to merge is encrypted"
+msgstr ""
+
+#. module: base
 #: code:addons/models.py:0
 #, python-format
 msgid ""
@@ -19511,7 +19532,7 @@ msgstr "Proprietar"
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_P
 msgid "P EDUCATION"
-msgstr "P EDUCAŢIE"
+msgstr "P EDUCAȚIE"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_pe
@@ -20165,7 +20186,7 @@ msgstr "Previzualizare imagine src"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_document_layout__preview_logo
 msgid "Preview logo"
-msgstr ""
+msgstr "Previzualizare Logo"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_report_layout__pdf
@@ -21200,7 +21221,7 @@ msgstr "Resetați la versiunea fișierului (resetare hard)."
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_document_layout
 msgid "Reset to logo colors"
-msgstr ""
+msgstr "Resetare la culorile logo-ului"
 
 #. module: base
 #: code:addons/models.py:0
@@ -22531,7 +22552,7 @@ msgstr "Începe configurare"
 #: model_terms:ir.ui.view,arch_db:base.view_partner_short_form
 #: model_terms:ir.ui.view,arch_db:base.view_res_bank_form
 msgid "State"
-msgstr "Judeţ"
+msgstr "Județ"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country_state__code
@@ -22556,7 +22577,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country__state_ids
 msgid "States"
-msgstr "Judeţe"
+msgstr "Județe"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_language_install__state
@@ -23206,6 +23227,8 @@ msgid ""
 "The Tax Identification Number. Complete it if the contact is subjected to "
 "government taxes. Used in some legal statements."
 msgstr ""
+"Numărul de identificare fiscală. Completați-l dacă contactul este supus "
+"taxelor guvernamentale. Folosit în unele declarații juridice."
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_lang_url_code_uniq
@@ -23532,6 +23555,10 @@ msgid ""
 "%(multi_company_warning)s\n"
 "(Records: %(example_records)s, User: %(user_id)s)"
 msgstr ""
+"Opera cerută (\"%(operation)s\" pe \"%(document_kind)s\" (%(document_model)s)) a fost respinsă din cauza următoarelor reguli :\n"
+"%(rules_list)s\n"
+"%(multi_company_warning)s\n"
+"(Înregistrare: %(example_records)s, Utilizator: %(user_id)s)"
 
 #. module: base
 #: code:addons/models.py:0
@@ -23905,14 +23932,6 @@ msgstr "Acest modul va declanșa dezinstalarea modulelor următoare."
 msgid ""
 "This operation is allowed for the groups:\n"
 "%(groups_list)s"
-msgstr ""
-
-#. module: base
-#: code:addons/base/ir/ir_sequence.py:56
-#, python-format
-msgid ""
-"This transaction wasn't executed because another transaction is already "
-"using the same no-gap sequence. Please try again later."
 msgstr ""
 
 #. module: base
@@ -25413,7 +25432,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_partner__website
 #: model:ir.model.fields,field_description:base.field_res_users__website
 msgid "Website Link"
-msgstr ""
+msgstr "Website Link"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_livechat
@@ -26045,7 +26064,7 @@ msgstr "e.g. English"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_document_layout
 msgid "e.g. Global Business Solutions"
-msgstr ""
+msgstr "de exemplu. Soluții de afaceri globale"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
@@ -26060,7 +26079,7 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_document_layout
 msgid "e.g. Opening hours, bank accounts (one per line)"
-msgstr ""
+msgstr "de exemplu. Program de lucru, conturi bancare (unul pe linie)"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form

@@ -620,7 +620,19 @@ var FieldDateRange = InputField.extend({
         if (this.$pickerContainer) {
             this.$pickerContainer.remove();
         }
+        if (this._onScroll) {
+            window.removeEventListener('scroll', this._onScroll, true);
+        }
         this._super.apply(this, arguments);
+    },
+    /**
+     * Return the date written in the input, in UTC.
+     *
+     * @private
+     * @returns {Moment|false}
+     */
+    _getValue: function () {
+        return field_utils.parse[this.formatType](this.$input.val(), this.field, { timezone: true });
     },
 
     //--------------------------------------------------------------------------
@@ -682,6 +694,8 @@ var FieldDateRange = InputField.extend({
 
         this.$el.daterangepicker(this.dateRangePickerOptions);
         this.$el.on('apply.daterangepicker', this._applyChanges.bind(this));
+        this.$el.on('show.daterangepicker', this._onDateRangePickerShow.bind(this));
+        this.$el.on('hide.daterangepicker', this._onDateRangePickerHide.bind(this));
         this.$el.off('keyup.daterangepicker');
         this.$pickerContainer = this.$el.data('daterangepicker').container;
 
@@ -697,6 +711,37 @@ var FieldDateRange = InputField.extend({
         this.$pickerContainer.on('focusin.bs.modal', 'select', function (ev) {
             ev.stopPropagation();
         });
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * Unbind the scroll event handler when the daterangepicker is closed.
+     *
+     * @private
+     */
+    _onDateRangePickerHide() {
+        if (this._onScroll) {
+            window.removeEventListener('scroll', this._onScroll, true);
+        }
+    },
+    /**
+     * Bind the scroll event handle when the daterangepicker is open.
+     *
+     * @private
+     */
+    _onDateRangePickerShow() {
+        this._onScroll = ev => {
+            if (!config.device.isMobile && !this.$pickerContainer.get(0).contains(ev.target)) {
+                let data = this.$el.data('daterangepicker');
+                if (data) {
+                    data.hide();
+                }
+            }
+        };
+        window.addEventListener('scroll', this._onScroll, true);
     },
 });
 
@@ -2169,8 +2214,10 @@ var PriorityWidget = AbstractField.extend({
         this.$el.empty();
         this.empty_value = this.field.selection[0][0];
         this.$el.attr('aria-label', this.string);
+        const isReadonly = this.record.evalModifiers(this.attrs.modifiers).readonly;
         _.each(this.field.selection.slice(1), function (choice, index) {
-            self.$el.append(self._renderStar('<a href="#">', index_value >= index+1, index+1, choice[1], index_value));
+            const tag = isReadonly ? '<span>' : '<a href="#">';
+            self.$el.append(self._renderStar(tag, index_value >= index + 1, index + 1, choice[1], index_value));
         });
     },
 

@@ -82,7 +82,7 @@ class PickingType(models.Model):
         if 'sequence_id' not in vals or not vals['sequence_id']:
             if vals['warehouse_id']:
                 wh = self.env['stock.warehouse'].browse(vals['warehouse_id'])
-                vals['sequence_id'] = self.env['ir.sequence'].create({
+                vals['sequence_id'] = self.env['ir.sequence'].sudo().create({
                     'name': wh.name + ' ' + _('Sequence') + ' ' + vals['sequence_code'],
                     'prefix': wh.code + '/' + vals['sequence_code'] + '/', 'padding': 5,
                     'company_id': wh.company_id.id,
@@ -472,8 +472,11 @@ class Picking(models.Model):
             picking.move_line_exist = bool(picking.move_line_ids)
 
     def _compute_has_packages(self):
+        domain = [('picking_id', 'in', self.ids), ('result_package_id', '!=', False)]
+        cnt_by_picking = self.env['stock.move.line'].read_group(domain, ['picking_id'], ['picking_id'])
+        cnt_by_picking = {d['picking_id'][0]: d['picking_id_count'] for d in cnt_by_picking}
         for picking in self:
-            picking.has_packages = picking.move_line_ids.filtered(lambda ml: ml.result_package_id)
+            picking.has_packages = bool(cnt_by_picking.get(picking.id, False))
 
     def _compute_show_check_availability(self):
         """ According to `picking.show_check_availability`, the "check availability" button will be
@@ -795,7 +798,7 @@ class Picking(models.Model):
             for pack in origin_packages:
                 if picking._check_move_lines_map_quant_package(pack):
                     package_level_ids = picking.package_level_ids.filtered(lambda pl: pl.package_id == pack)
-                    move_lines_to_pack = picking.move_line_ids.filtered(lambda ml: ml.package_id == pack)
+                    move_lines_to_pack = picking.move_line_ids.filtered(lambda ml: ml.package_id == pack and not ml.result_package_id)
                     if not package_level_ids:
                         self.env['stock.package_level'].create({
                             'picking_id': picking.id,
